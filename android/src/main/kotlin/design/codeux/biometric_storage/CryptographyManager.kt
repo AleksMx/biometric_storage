@@ -20,6 +20,7 @@ package design.codeux.biometric_storage
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.security.keystore.KeyInfo
 import mu.KotlinLogging
 import java.io.File
 import java.nio.charset.Charset
@@ -29,6 +30,8 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.SecretKeyFactory
+import org.json.JSONObject;
 
 private val logger = KotlinLogging.logger {}
 
@@ -180,4 +183,32 @@ class CryptographyManagerImpl(
         return keyGenerator.generateKey()
     }
 
+    private fun getSecretKey(keyName: String): SecretKey? {
+        val realKeyName = KEY_PREFIX + keyName
+        // If Secretkey was previously created for that keyName, then grab and return it.
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        keyStore.getKey(realKeyName, null)?.let { return it as SecretKey }
+        return null;
+    }
+
+    fun getDetails(keyName: String): JSONObject {
+        val obj = JSONObject()
+
+        val secretKey = getSecretKey(keyName)
+
+        val factory = SecretKeyFactory.getInstance(secretKey!!.algorithm, "AndroidKeyStore")
+        try {
+            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
+            
+            obj.put("isInsideSecureHardware", keyInfo.isInsideSecureHardware())
+
+        } catch (e: Exception) {
+            obj.put("error", e.toString())
+            return obj
+        }
+
+        obj.put("keyName", keyName)
+        return obj
+    }
 }

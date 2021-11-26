@@ -233,6 +233,11 @@ abstract class BiometricStorage extends PlatformInterface {
   );
 
   @protected
+  Future<String?> getDetails(
+    String name
+  );
+
+  @protected
   Future<bool?> delete(
     String name,
     PromptInfo promptInfo,
@@ -341,6 +346,14 @@ class MethodChannelBiometricStorage extends BiometricStorage {
   }
 
   @override
+  Future<String?> getDetails(
+    String name
+  ) =>
+      _transformErrors(_channel.invokeMethod<String>('getDetails', <String, dynamic>{
+        'name': name
+      }));
+
+  @override
   Future<String?> read(
     String name,
     PromptInfo promptInfo,
@@ -435,6 +448,8 @@ class BiometricStorageFile {
   final BiometricStorage _plugin;
   final String name;
   final PromptInfo promptInfo;
+
+  Future<String?> getDetails() => _plugin.getDetails(name);
 
   /// read from the secure file and returns the content.
   /// Will return `null` if file does not exist.

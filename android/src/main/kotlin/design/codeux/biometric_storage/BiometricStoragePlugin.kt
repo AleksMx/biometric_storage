@@ -217,6 +217,10 @@ class BiometricStoragePlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                     storageFiles[name] = BiometricStorageFile(applicationContext, name, options)
                     result.success(true)
                 }
+                "getDetails" -> {
+                    val name = getName()
+                    result.success(storageFiles[name]?.getDetails())
+                }
                 "dispose" -> storageFiles.remove(getName())?.apply {
                     dispose()
                     result.success(true)

@@ -201,4 +201,9 @@ class BiometricStorageFile(
         logger.trace { "dispose" }
     }
 
+    @Synchronized
+    fun getDetails(): String {
+    	var obj = cryptographyManager.getDetails(masterKeyName)
+    	return obj.toString()
+    }
 }
