@@ -197,15 +197,19 @@ class CryptographyManagerImpl(
 
         val secretKey = getSecretKey(keyName)
 
-        val factory = SecretKeyFactory.getInstance(secretKey!!.algorithm, "AndroidKeyStore")
-        try {
-            val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
-            
-            obj.put("isInsideSecureHardware", keyInfo.isInsideSecureHardware())
+        if (secretKey!!.algorithm == null) {
+            obj.put("error", "algorithm is null");
+        } else {
+            val factory = SecretKeyFactory.getInstance(secretKey!!.algorithm, "AndroidKeyStore")
+            try {
+                val keyInfo: KeyInfo = factory.getKeySpec(secretKey, KeyInfo::class.java) as KeyInfo
 
-        } catch (e: Exception) {
-            obj.put("error", e.toString())
-            return obj
+                obj.put("isInsideSecureHardware", keyInfo.isInsideSecureHardware())
+
+            } catch (e: Exception) {
+                obj.put("error", e.toString())
+                return obj
+            }
         }
 
         obj.put("keyName", keyName)
