@@ -197,7 +197,7 @@ class CryptographyManagerImpl(
 
         val secretKey = getSecretKey(keyName)
 
-        if (secretKey!!.algorithm == null) {
+        if (secretKey == null || secretKey!!.algorithm == null) {
             obj.put("error", "algorithm is null");
         } else {
             val factory = SecretKeyFactory.getInstance(secretKey!!.algorithm, "AndroidKeyStore")
